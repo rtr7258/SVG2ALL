@@ -58,16 +58,13 @@
 
                         <!-- Drag & Drop Area -->
                         <div class="w-full md:w-3/4">
-                            <div id="dragDropArea" class="drag-drop-area rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <p class="text-gray-700 font-medium mb-1">Drag & drop SVG files here or click to browse</p>
-                                    <p class="text-gray-500 text-sm">You can upload up to 100 SVG files</p>
-                                </div>
-                                <input type="file" id="fileInput" class="hidden" accept=".svg" multiple>
-                            </div>
+                            <div class="upload-area">
+  <p id="file-count">You have uploaded: 0 files</p>
+  <div id="drop-zone" style="border: 2px dashed #ccc; padding: 20px; text-align: center;">
+    Drag & drop SVG files here or <input type="file" id="file-input" accept=".svg" multiple>
+  </div>
+</div>
+
 
                             <!-- Batch Processing Notice -->
                             <div id="batchNotice" class="hidden mt-4 p-3 bg-yellow-50 text-yellow-700 rounded-md text-sm">
