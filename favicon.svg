@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <!-- Background Circle -->
+  <circle cx="50" cy="50" r="48" fill="#3B82F6" />
+  
+  <!-- SVG Text -->
+  <text x="50" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="white">SVG</text>
+  
+  <!-- Arrow -->
+  <path d="M30,55 L50,65 L70,55" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- Multiple Format Dots -->
+  <circle cx="30" cy="75" r="5" fill="white" />
+  <circle cx="50" cy="75" r="5" fill="white" />
+  <circle cx="70" cy="75" r="5" fill="white" />
+</svg>
