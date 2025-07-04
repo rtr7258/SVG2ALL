@@ -21,6 +21,15 @@ const individualDownloads = document.getElementById('individualDownloads');
 const formatCheckboxes = document.querySelectorAll('input[data-format]');
 const downloadOptionRadios = document.querySelectorAll('input[name="downloadOption"]');
 
+<script>
+  const fileInput = document.getElementById('fileInput'); // Make sure your file input has id="fileInput"
+  const fileCountText = document.getElementById('fileCountText');
+
+  fileInput.addEventListener('change', () => {
+    fileCountText.textContent = `You have uploaded files: ${fileInput.files.length}`;
+  });
+</script>
+
 // Event listeners
 dragDropArea.addEventListener('click', () => fileInput.click());
 dragDropArea.addEventListener('dragover', (e) => {
