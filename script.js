@@ -60,13 +60,7 @@ function handleFiles(files) {
         alert('You can upload a maximum of 100 files at once.');
         return;
     }
-
-
-    // ====== ADD THIS ====== (Update counter)
-    `uploadedFileCount = uploadedFiles.length;`  // Reset count to current files
-    `updateFileCounter();`
     
-}
     // ====== ADD THIS FUNCTION ======
 `function updateFileCounter() {`
     `document.getElementById("fileCount").textContent = uploadedFileCount;`
