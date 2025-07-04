@@ -9,7 +9,7 @@ let convertedFiles = {
 let currentBatch = 0;
 const BATCH_SIZE = 25;
 
-<script>
+
 
 
                             
@@ -50,7 +50,7 @@ const BATCH_SIZE = 25;
       fileInput.files = dt.files;
     });
   });
-</script>
+
 
 // DOM elements
 const dragDropArea = document.getElementById('dragDropArea');
