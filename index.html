@@ -56,7 +56,33 @@
                             </div>
                         </div>
                         
-                        <span id="fileCountText">You have uploaded files: 0</span>
+                        <!-- File Upload Input -->
+<input type="file" id="fileInput" multiple>
+
+<!-- File Count Text -->
+<span id="fileCountText">You have uploaded files: 0</span>
+
+<!-- File Count Style -->
+<style>
+  #fileCountText {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+  }
+</style>
+
+<!-- JavaScript Code -->
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('fileInput');
+    const fileCountText = document.getElementById('fileCountText');
+
+    fileInput.addEventListener('change', function () {
+      fileCountText.textContent = `You have uploaded files: ${fileInput.files.length}`;
+    });
+  });
+</script>
+
 
 
                         <!-- Drag & Drop Area -->
