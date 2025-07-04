@@ -58,40 +58,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload Counter</title>
-    <style>
-        .file-counter {
-            font-family: Arial, sans-serif;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            margin: 10px 0;
-            display: inline-block;
-        }
-        .counter-number {
-            font-weight: bold;
-            color: #2c7be5;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Counter</title>
+  <style>
+    #fileCounterBox {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: fit-content;
+      font-family: Arial, sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <div class="file-upload-container">
-        <input type="file" id="fileInput" multiple>
-        <div class="file-counter">
-            Files uploaded: <span class="counter-number" id="fileCount">0</span>
-        </div>
-    </div>
 
-    <script>
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const fileCountElement = document.getElementById('fileCount');
-            // Count the number of files selected
-            const count = this.files ? this.files.length : 0;
-            fileCountElement.textContent = count;
-        });
-    </script>
+  
+
+  <!-- File Counter Box -->
+  <div id="fileCounterBox">
+    You have uploaded files: <span id="fileCount">0</span>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileCount = document.getElementById('fileCount');
+
+    fileInput.addEventListener('change', () => {
+      fileCount.textContent = fileInput.files.length;
+    });
+  </script>
+
 </body>
 </html>
                         <!-- Drag & Drop Area -->
