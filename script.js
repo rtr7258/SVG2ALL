@@ -1,398 +1,270 @@
-// Initialize variables
-let uploadedFiles = [];
-let convertedFiles = {
-    png: [],
-    jpg: [],
-    pdf: [],
-    webp: []
-};
-let currentBatch = 0;
-const BATCH_SIZE = 25;
-
-
-
-
-                            
-
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const dragDropArea = document.getElementById('dragDropArea');
+    const fileInput = document.getElementById('fileInput');
+    const convertBtn = document.getElementById('convertBtn');
+    const nextBatchBtn = document.getElementById('nextBatchBtn');
+    const batchNotice = document.getElementById('batchNotice');
+    const fileCountText = document.getElementById('fileCountText');
+    const downloadOptions = document.getElementById('downloadOptions');
+    const zipDownloadButtons = document.getElementById('zipDownloadButtons');
+    const individualDownloads = document.getElementById('individualDownloads');
+    const formatCheckboxes = document.querySelectorAll('input[data-format]');
     
-
-// DOM elements
-const dragDropArea = document.getElementById('dragDropArea');
-const fileInput = document.getElementById('fileInput');
-const convertBtn = document.getElementById('convertBtn');
-const nextBatchBtn = document.getElementById('nextBatchBtn');
-const batchNotice = document.getElementById('batchNotice');
-const downloadOptions = document.getElementById('downloadOptions');
-const zipDownloadButtons = document.getElementById('zipDownloadButtons');
-const individualDownloads = document.getElementById('individualDownloads');
-const formatCheckboxes = document.querySelectorAll('input[data-format]');
-const downloadOptionRadios = document.querySelectorAll('input[name="downloadOption"]');
-
-// Event listeners
-dragDropArea.addEventListener('click', () => fileInput.click());
-dragDropArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dragDropArea.classList.add('drag-over');
-});
-dragDropArea.addEventListener('dragleave', () => {
-    dragDropArea.classList.remove('drag-over');
-});
-dragDropArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dragDropArea.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
-});
-fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-convertBtn.addEventListener('click', convertFiles);
-nextBatchBtn.addEventListener('click', convertNextBatch);
-
-// Download option change handler
-downloadOptionRadios.forEach(radio => {
-    radio.addEventListener('change', () => {
-        if (radio.value === 'zip') {
-            zipDownloadButtons.classList.remove('hidden');
-            individualDownloads.classList.add('hidden');
-        } else {
-            zipDownloadButtons.classList.add('hidden');
-            individualDownloads.classList.remove('hidden');
-            updateIndividualDownloadsUI();
+    // State variables
+    let files = [];
+    let currentBatch = 0;
+    const BATCH_SIZE = 25;
+    let conversionResults = {};
+    
+    // Initialize drag and drop
+    setupDragAndDrop();
+    
+    // Event Listeners
+    dragDropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileSelect);
+    convertBtn.addEventListener('click', startConversion);
+    nextBatchBtn.addEventListener('click', processNextBatch);
+    
+    // Setup drag and drop functionality
+    function setupDragAndDrop() {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dragDropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        dragDropArea.addEventListener('drop', handleDrop, false);
+    }
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    function highlight() {
+        dragDropArea.classList.add('drag-over');
+    }
+    
+    function unhighlight() {
+        dragDropArea.classList.remove('drag-over');
+    }
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const droppedFiles = dt.files;
+        handleFiles(droppedFiles);
+    }
+    
+    function handleFileSelect(e) {
+        handleFiles(e.target.files);
+    }
+    
+    function handleFiles(selectedFiles) {
+        // Filter only SVG files
+        const svgFiles = Array.from(selectedFiles).filter(file => file.name.endsWith('.svg'));
+        
+        if (svgFiles.length === 0) {
+            alert('Please select SVG files only.');
+            return;
         }
-    });
-});
-
-// Handle uploaded files
-function handleFiles(files) {
-    if (files.length > 100) {
-        alert('You can upload a maximum of 100 files at once.');
-        return;
-    }
-
-    // Filter only SVG files
-    uploadedFiles = Array.from(files).filter(file => file.type === 'image/svg+xml' || file.name.endsWith('.svg'));
-    
-    if (uploadedFiles.length === 0) {
-        alert('No valid SVG files found. Please upload files with .svg extension.');
-        return;
-    }
-
-    // Reset conversion state
-    convertedFiles = { png: [], jpg: [], pdf: [], webp: [] };
-    currentBatch = 0;
-    
-    // Update UI based on file count
-    if (uploadedFiles.length > BATCH_SIZE) {
-        batchNotice.classList.remove('hidden');
-        convertBtn.disabled = false;
-        nextBatchBtn.classList.add('hidden');
-    } else {
-        batchNotice.classList.add('hidden');
-        convertBtn.disabled = false;
-        nextBatchBtn.classList.add('hidden');
+        
+        files = svgFiles;
+        updateFileCount();
+        
+        // Enable convert button if we have files
+        convertBtn.disabled = files.length === 0;
+        
+        // Show batch notice if we have more than BATCH_SIZE files
+        if (files.length > BATCH_SIZE) {
+            batchNotice.classList.remove('hidden');
+            nextBatchBtn.classList.remove('hidden');
+        } else {
+            batchNotice.classList.add('hidden');
+            nextBatchBtn.classList.add('hidden');
+        }
+        
+        // Reset batch counter
+        currentBatch = 0;
     }
     
-    // Clear previous download options
-    downloadOptions.classList.add('hidden');
-}
-
-// Get selected formats
-function getSelectedFormats() {
-    return Array.from(formatCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.dataset.format);
-}
-
-// Convert files (either initial batch or next batch)
-function convertFiles() {
-    const selectedFormats = getSelectedFormats();
-    if (selectedFormats.length === 0) {
-        alert('Please select at least one output format.');
-        return;
+    function updateFileCount() {
+        fileCountText.textContent = `You have uploaded files: ${files.length}`;
     }
-
-    const startIdx = currentBatch * BATCH_SIZE;
-    const endIdx = Math.min(startIdx + BATCH_SIZE, uploadedFiles.length);
-    const batchFiles = uploadedFiles.slice(startIdx, endIdx);
-
-    // Disable buttons during conversion
-    convertBtn.disabled = true;
-    nextBatchBtn.disabled = true;
-    convertBtn.textContent = 'Converting...';
-
-    // Re-enable buttons after conversion
-convertBtn.disabled = false;
-nextBatchBtn.disabled = false;
-
-// Reset button text
-convertBtn.textContent = 'Convert';
-
     
-    // Process each file in the batch
-    const conversionPromises = batchFiles.map(file => convertSVG(file, selectedFormats));
+    async function startConversion() {
+        // Reset conversion results
+        conversionResults = {};
+        
+        // Process first batch
+        await processNextBatch();
+    }
     
-    Promise.all(conversionPromises)
-        .then(() => {
+    async function processNextBatch() {
+        // Disable buttons during conversion
+        convertBtn.disabled = true;
+        nextBatchBtn.disabled = true;
+        convertBtn.textContent = 'Converting...';
+        
+        try {
+            // Get current batch of files
+            const batchStart = currentBatch * BATCH_SIZE;
+            const batchEnd = batchStart + BATCH_SIZE;
+            const batchFiles = files.slice(batchStart, batchEnd);
+            
+            // Process each file in the batch
+            for (const file of batchFiles) {
+                const fileName = file.name.replace('.svg', '');
+                conversionResults[fileName] = {};
+                
+                // Read the file content
+                const svgContent = await readFileAsText(file);
+                
+                // Convert to selected formats
+                for (const checkbox of formatCheckboxes) {
+                    if (checkbox.checked) {
+                        const format = checkbox.dataset.format;
+                        conversionResults[fileName][format] = await convertSvg(svgContent, format, fileName);
+                    }
+                }
+            }
+            
+            // Update batch counter
             currentBatch++;
             
-            // Update UI based on whether there are more files to process
-            if (currentBatch * BATCH_SIZE < uploadedFiles.length) {
-                nextBatchBtn.classList.remove('hidden');
+            // Check if we have more files to process
+            if (currentBatch * BATCH_SIZE < files.length) {
                 nextBatchBtn.disabled = false;
-                convertBtn.textContent = 'Convert Files';
-                convertBtn.disabled = true;
+                convertBtn.textContent = `Convert Batch ${currentBatch + 1}`;
             } else {
                 // All files processed
                 convertBtn.textContent = 'Convert Files';
-                updateDownloadUI();
-                downloadOptions.classList.remove('hidden');
+                nextBatchBtn.classList.add('hidden');
+                showDownloadOptions();
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Conversion error:', error);
             alert('An error occurred during conversion. Please try again.');
+        } finally {
+            // Always re-enable the convert button
             convertBtn.disabled = false;
-            convertBtn.textContent = 'Convert Files';
-        });
-}
-
-// Convert next batch of files
-function convertNextBatch() {
-    nextBatchBtn.disabled = true;
-    nextBatchBtn.textContent = 'Converting...';
-    convertFiles();
-}
-
-// Convert a single SVG file to all selected formats
-function convertSVG(file, formats) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        
-        reader.onload = async (e) => {
-            try {
-                const svgData = e.target.result;
-                const img = new Image();
-                
-                img.onload = async () => {
-                    try {
-                        // Create canvas for raster formats
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        
-                        // Process each selected format
-                        const formatPromises = formats.map(format => {
-                            switch (format) {
-                                case 'png':
-                                    return convertToPNG(canvas, ctx, img, file.name);
-                                case 'jpg':
-                                    return convertToJPG(canvas, ctx, img, file.name);
-                                case 'webp':
-                                    return convertToWebP(canvas, ctx, img, file.name);
-                                case 'pdf':
-                                    return convertToPDF(img, file.name);
-                                default:
-                                    return Promise.resolve();
-                            }
-                        });
-                        
-                        await Promise.all(formatPromises);
-                        resolve();
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                
-                img.onerror = () => reject(new Error('Failed to load SVG image'));
-                img.src = e.target.result;
-            } catch (error) {
-                reject(error);
-            }
-        };
-        
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsDataURL(file);
-    });
-}
-
-// Convert to PNG
-function convertToPNG(canvas, ctx, img, originalName) {
-    return new Promise((resolve) => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-            const fileName = originalName.replace('.svg', '.png');
-            convertedFiles.png.push({ name: fileName, blob });
-            resolve();
-        }, 'image/png');
-    });
-}
-
-// Convert to JPG
-function convertToJPG(canvas, ctx, img, originalName) {
-    return new Promise((resolve) => {
-        // Fill with white background first
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-            const fileName = originalName.replace('.svg', '.jpg');
-            convertedFiles.jpg.push({ name: fileName, blob });
-            resolve();
-        }, 'image/jpeg', 0.92); // 0.92 quality
-    });
-}
-
-// Convert to WebP
-function convertToWebP(canvas, ctx, img, originalName) {
-    return new Promise((resolve) => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-            const fileName = originalName.replace('.svg', '.webp');
-            convertedFiles.webp.push({ name: fileName, blob });
-            resolve();
-        }, 'image/webp', 0.92); // 0.92 quality
-    });
-}
-
-// Convert to PDF
-function convertToPDF(img, originalName) {
-    return new Promise((resolve) => {
-        // jsPDF is available globally via CDN
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: img.width > img.height ? 'landscape' : 'portrait',
-            unit: 'px'
-        });
-        
-        // Add SVG as image to PDF
-        pdf.addImage(img, 'JPEG', 0, 0, img.width, img.height);
-        
-        const pdfBlob = pdf.output('blob');
-        const fileName = originalName.replace('.svg', '.pdf');
-        convertedFiles.pdf.push({ name: fileName, blob: pdfBlob });
-        resolve();
-    });
-}
-
-// Update download UI after conversion
-function updateDownloadUI() {
-    // Update ZIP download buttons
-    zipDownloadButtons.innerHTML = '';
-    
-    if (convertedFiles.png.length > 0) {
-        const btn = createDownloadButton('Download PNGs (.zip)', 'png');
-        zipDownloadButtons.appendChild(btn);
-    }
-    
-    if (convertedFiles.jpg.length > 0) {
-        const btn = createDownloadButton('Download JPGs (.zip)', 'jpg');
-        zipDownloadButtons.appendChild(btn);
-    }
-    
-    if (convertedFiles.pdf.length > 0) {
-        const btn = createDownloadButton('Download PDFs (.zip)', 'pdf');
-        zipDownloadButtons.appendChild(btn);
-    }
-    
-    if (convertedFiles.webp.length > 0) {
-        const btn = createDownloadButton('Download WebPs (.zip)', 'webp');
-        zipDownloadButtons.appendChild(btn);
-    }
-    
-    // Update individual downloads if that view is active
-    if (document.querySelector('input[name="downloadOption"]:checked').value === 'individual') {
-        updateIndividualDownloadsUI();
-    }
-}
-
-// Create a download button for ZIP files
-function createDownloadButton(text, format) {
-    const btn = document.createElement('button');
-    btn.className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition';
-    btn.textContent = text;
-    
-    btn.addEventListener('click', () => {
-        btn.disabled = true;
-        btn.textContent = 'Preparing ZIP...';
-        
-        createZipFile(format)
-            .then(blob => {
-                saveAs(blob, `${format}s.zip`);
-                btn.disabled = false;
-                btn.textContent = text;
-            })
-            .catch(error => {
-                console.error('Error creating ZIP:', error);
-                alert('Failed to create ZIP file. Please try again.');
-                btn.disabled = false;
-                btn.textContent = text;
-            });
-    });
-    
-    return btn;
-}
-
-// Create a ZIP file for a specific format
-function createZipFile(format) {
-    return new Promise((resolve, reject) => {
-        const zip = new JSZip();
-        const files = convertedFiles[format];
-        
-        files.forEach(file => {
-            zip.file(file.name, file.blob);
-        });
-        
-        zip.generateAsync({ type: 'blob' })
-            .then(resolve)
-            .catch(reject);
-    });
-}
-
-// Update individual downloads UI
-function updateIndividualDownloadsUI() {
-    individualDownloads.innerHTML = '';
-    
-    // Create sections for each format
-    for (const format in convertedFiles) {
-        if (convertedFiles[format].length > 0) {
-            const section = document.createElement('div');
-            section.className = 'space-y-2';
-            
-            const heading = document.createElement('h4');
-            heading.className = 'font-medium text-gray-700 capitalize';
-            heading.textContent = `${format} Files:`;
-            section.appendChild(heading);
-            
-            const list = document.createElement('div');
-            list.className = 'space-y-1 ml-4';
-            
-            convertedFiles[format].forEach(file => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center justify-between';
-                
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'text-gray-600 truncate';
-                nameSpan.textContent = file.name;
-                
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1 px-3 rounded transition';
-                downloadBtn.textContent = 'Download';
-                
-                downloadBtn.addEventListener('click', () => {
-                    saveAs(file.blob, file.name);
-                });
-                
-                item.appendChild(nameSpan);
-                item.appendChild(downloadBtn);
-                list.appendChild(item);
-            });
-            
-            section.appendChild(list);
-            individualDownloads.appendChild(section);
         }
     }
-}
+    
+    function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(new Error('File reading failed'));
+            reader.readAsText(file);
+        });
+    }
+    
+    async function convertSvg(svgContent, format, fileName) {
+        // Simulate conversion (replace with actual conversion logic)
+        console.log(`Converting ${fileName} to ${format}`);
+        
+        // In a real app, you would use libraries like canvg, html2canvas, etc.
+        // This is just a simulation with a delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Return a mock result (replace with actual conversion result)
+        return `data:image/${format};base64,mockbase64datafor${fileName}.${format}`;
+    }
+    
+    function showDownloadOptions() {
+        downloadOptions.classList.remove('hidden');
+        
+        // Clear previous download buttons
+        zipDownloadButtons.innerHTML = '';
+        individualDownloads.innerHTML = '';
+        
+        // Get selected formats
+        const selectedFormats = Array.from(formatCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.dataset.format);
+        
+        // Create ZIP download buttons for each format
+        selectedFormats.forEach(format => {
+            const button = document.createElement('button');
+            button.className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition';
+            button.textContent = `Download All ${format.toUpperCase()}s as ZIP`;
+            button.addEventListener('click', () => downloadAllAsZip(format));
+            zipDownloadButtons.appendChild(button);
+        });
+        
+        // Setup individual downloads (hidden by default)
+        if (document.querySelector('input[name="downloadOption"]:checked').value === 'individual') {
+            showIndividualDownloads();
+        }
+        
+        // Add event listener for download option changes
+        document.querySelectorAll('input[name="downloadOption"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'individual') {
+                    showIndividualDownloads();
+                } else {
+                    individualDownloads.classList.add('hidden');
+                    zipDownloadButtons.classList.remove('hidden');
+                }
+            });
+        });
+    }
+    
+    function showIndividualDownloads() {
+        individualDownloads.innerHTML = '';
+        individualDownloads.classList.remove('hidden');
+        zipDownloadButtons.classList.add('hidden');
+        
+        // Create download links for each file and format
+        Object.entries(conversionResults).forEach(([fileName, formats]) => {
+            const fileSection = document.createElement('div');
+            fileSection.className = 'border-b border-gray-200 pb-4';
+            
+            const title = document.createElement('h4');
+            title.className = 'font-medium text-gray-800 mb-3';
+            title.textContent = fileName;
+            fileSection.appendChild(title);
+            
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'flex flex-wrap gap-3';
+            
+            Object.entries(formats).forEach(([format, dataUrl]) => {
+                const button = document.createElement('a');
+                button.className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm';
+                button.textContent = format.toUpperCase();
+                button.href = dataUrl;
+                button.download = `${fileName}.${format}`;
+                buttonsContainer.appendChild(button);
+            });
+            
+            fileSection.appendChild(buttonsContainer);
+            individualDownloads.appendChild(fileSection);
+        });
+    }
+    
+    function downloadAllAsZip(format) {
+        // Create a new JSZip instance
+        const zip = new JSZip();
+        
+        // Add each converted file to the zip
+        Object.entries(conversionResults).forEach(([fileName, formats]) => {
+            if (formats[format]) {
+                // Extract base64 data from data URL
+                const base64Data = formats[format].split(',')[1];
+                zip.file(`${fileName}.${format}`, base64Data, { base64: true });
+            }
+        });
+        
+        // Generate the zip file
+        zip.generateAsync({ type: 'blob' }).then(content => {
+            saveAs(content, `converted_files_${format}.zip`);
+        });
+    }
+});
