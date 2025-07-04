@@ -8,7 +8,8 @@ let convertedFiles = {
 };
 let currentBatch = 0;
 const BATCH_SIZE = 25;
-
+// ====== ADD THIS ====== (File counter variable)
+`let uploadedFileCount = 0;`  // Track total uploaded files
 // DOM elements
 const dragDropArea = document.getElementById('dragDropArea');
 const fileInput = document.getElementById('fileInput');
@@ -59,7 +60,28 @@ function handleFiles(files) {
         alert('You can upload a maximum of 100 files at once.');
         return;
     }
+// Filter only SVG files
+    uploadedFiles = Array.from(files).filter(file => file.type === 'image/svg+xml' || file.name.endsWith('.svg'));
+    
+    if (uploadedFiles.length === 0) {
+        alert('No valid SVG files found. Please upload files with .svg extension.');
+        return;
+    }
 
+    // ====== ADD THIS ====== (Update counter)
+    `uploadedFileCount = uploadedFiles.length;`  // Reset count to current files
+    `updateFileCounter();`
+
+    // Reset conversion state
+    convertedFiles = { png: [], jpg: [], pdf: [], webp: [] };
+    currentBatch = 0;
+    
+    // ... (rest of your existing code)
+}
+    // ====== ADD THIS FUNCTION ======
+`function updateFileCounter() {`
+    `document.getElementById("fileCount").textContent = uploadedFileCount;`
+`}`
     // Filter only SVG files
     uploadedFiles = Array.from(files).filter(file => file.type === 'image/svg+xml' || file.name.endsWith('.svg'));
     
