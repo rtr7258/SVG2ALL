@@ -75,7 +75,8 @@
       updateFileCount();
     });
 
-    
+    // Click to browse
+    dragDropArea.addEventListener('click', () => fileInput.click());
 
     // Drag events
     dragDropArea.addEventListener('dragover', function (e) {
