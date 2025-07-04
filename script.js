@@ -59,6 +59,10 @@ function handleFiles(files) {
         alert('You can upload a maximum of 100 files at once.');
         return;
     }
+    function updateFileCount() {
+    fileCountText.textContent = `You have uploaded files: ${files.length}`;
+    }
+
 
     // Filter only SVG files
     uploadedFiles = Array.from(files).filter(file => file.type === 'image/svg+xml' || file.name.endsWith('.svg'));
