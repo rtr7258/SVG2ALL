@@ -57,12 +57,18 @@
                         </div>
                         
         
-<!-- Drag & Drop Area -->
+<!-- File Input -->
+<input type="file" id="fileInput" multiple style="display:none;" />
+
+<!-- Drag & Drop Zone -->
+<div id="dropZone" style="width:300px;height:150px;border:2px dashed #aaa;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+  Drag & drop SVG files here or click to browse
+</div>
 
 <!-- File Count Text -->
 <span id="fileCountText">You have uploaded files: 0</span>
 
-<!-- File Count Style -->
+<!-- Style -->
 <style>
   #fileCountText {
     font-family: Arial, sans-serif;
@@ -71,14 +77,54 @@
   }
 </style>
 
-<!-- JavaScript Code -->
+<!-- JavaScript -->
 <script>
   window.addEventListener('DOMContentLoaded', function () {
+    const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const fileCountText = document.getElementById('fileCountText');
 
+    // Update count function
+    function updateFileCount(files) {
+      fileCountText.textContent = `You have uploaded files: ${files.length}`;
+    }
+
+    // Browse file select
     fileInput.addEventListener('change', function () {
-      fileCountText.textContent = `You have uploaded files: ${fileInput.files.length}`;
+      updateFileCount(fileInput.files);
+    });
+
+    // Click on drop zone to open file dialog
+    dropZone.addEventListener('click', function () {
+      fileInput.click();
+    });
+
+    // Drag over effect
+    dropZone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      dropZone.style.borderColor = 'green';
+    });
+
+    dropZone.addEventListener('dragleave', function () {
+      dropZone.style.borderColor = '#aaa';
+    });
+
+    // Drop files
+    dropZone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      dropZone.style.borderColor = '#aaa';
+
+      const droppedFiles = e.dataTransfer.files;
+
+      // Show count
+      updateFileCount(droppedFiles);
+
+      // Optional: If you want to also assign dropped files to fileInput for further usage
+      const dataTransfer = new DataTransfer();
+      for (let i = 0; i < droppedFiles.length; i++) {
+        dataTransfer.items.add(droppedFiles[i]);
+      }
+      fileInput.files = dataTransfer.files;
     });
   });
 </script>
