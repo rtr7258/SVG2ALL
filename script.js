@@ -71,10 +71,6 @@ function handleFiles(files) {
     // ====== ADD THIS ====== (Update counter)
     `uploadedFileCount = uploadedFiles.length;`  // Reset count to current files
     `updateFileCounter();`
-
-    // Reset conversion state
-    convertedFiles = { png: [], jpg: [], pdf: [], webp: [] };
-    currentBatch = 0;
     
 }
     // ====== ADD THIS FUNCTION ======
