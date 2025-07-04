@@ -55,7 +55,45 @@
                                 </label>
                             </div>
                         </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Counter</title>
+    <style>
+        .file-counter {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        .counter-number {
+            font-weight: bold;
+            color: #2c7be5;
+        }
+    </style>
+</head>
+<body>
+    <div class="file-upload-container">
+        <input type="file" id="fileInput" multiple>
+        <div class="file-counter">
+            Files uploaded: <span class="counter-number" id="fileCount">0</span>
+        </div>
+    </div>
 
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileCountElement = document.getElementById('fileCount');
+            // Count the number of files selected
+            const count = this.files ? this.files.length : 0;
+            fileCountElement.textContent = count;
+        });
+    </script>
+</body>
+</html>
                         <!-- Drag & Drop Area -->
                         <div class="w-full md:w-3/4">
                             <div id="dragDropArea" class="drag-drop-area rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50">
