@@ -1,12 +1,1 @@
-.file-counter {
-  display: inline-block;  /* Makes it align left */
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  color: #333;
-  margin-left: 5px;      /* Adjust as needed */
-}
-
-#fileCount {
-  font-weight: bold;
-  color: #2c3e50;
-}/* Additional styles can be added here if needed */
+/* Additional styles can be added here if needed */
