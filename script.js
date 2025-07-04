@@ -14,43 +14,7 @@ const BATCH_SIZE = 25;
 
                             
 
-    let uploadedFiles = [];
-
-    function updateFileCount() {
-      fileCountText.textContent = `You have uploaded files: ${uploadedFiles.length}`;
-    }
-
-    // Browse file
-    fileInput.addEventListener('change', function () {
-      uploadedFiles = Array.from(fileInput.files);
-      updateFileCount();
-    });
-
     
-
-    // Drag events
-    dragDropArea.addEventListener('dragover', function (e) {
-      e.preventDefault();
-      dragDropArea.classList.add('drag-over');
-    });
-
-    dragDropArea.addEventListener('dragleave', function () {
-      dragDropArea.classList.remove('drag-over');
-    });
-
-    dragDropArea.addEventListener('drop', function (e) {
-      e.preventDefault();
-      dragDropArea.classList.remove('drag-over');
-      uploadedFiles = Array.from(e.dataTransfer.files).filter(file => file.type === 'image/svg+xml');
-      updateFileCount();
-
-      // Optional: assign to input
-      const dt = new DataTransfer();
-      uploadedFiles.forEach(file => dt.items.add(file));
-      fileInput.files = dt.files;
-    });
-  });
-
 
 // DOM elements
 const dragDropArea = document.getElementById('dragDropArea');
