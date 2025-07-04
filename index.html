@@ -58,10 +58,9 @@
                         
                         <p id="fileCountText" class="text-gray-600 mt-4">You have uploaded files: 0</p>
                         <script>
-  
-    
-   
-    const fileCountText = document.getElementById('fileCountText');
+
+
+                            
 
     let uploadedFiles = [];
 
@@ -75,8 +74,7 @@
       updateFileCount();
     });
 
-    // Click to browse
-    dragDropArea.addEventListener('click', () => fileInput.click());
+    
 
     // Drag events
     dragDropArea.addEventListener('dragover', function (e) {
