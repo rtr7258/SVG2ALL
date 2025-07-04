@@ -118,6 +118,14 @@ function convertFiles() {
     nextBatchBtn.disabled = true;
     convertBtn.textContent = 'Converting...';
 
+    // Re-enable buttons after conversion
+convertBtn.disabled = false;
+nextBatchBtn.disabled = false;
+
+// Reset button text
+convertBtn.textContent = 'Convert';
+
+    
     // Process each file in the batch
     const conversionPromises = batchFiles.map(file => convertSVG(file, selectedFormats));
     
