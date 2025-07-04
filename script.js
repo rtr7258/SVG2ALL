@@ -76,7 +76,6 @@ function handleFiles(files) {
     convertedFiles = { png: [], jpg: [], pdf: [], webp: [] };
     currentBatch = 0;
     
-    // ... (rest of your existing code)
 }
     // ====== ADD THIS FUNCTION ======
 `function updateFileCounter() {`
