@@ -64,7 +64,8 @@ function handleFiles(files) {
 
     // Filter only SVG files
     uploadedFiles = Array.from(files).filter(file => file.type === 'image/svg+xml' || file.name.endsWith('.svg'));
-    
+    document.getElementById('fileCount').textContent = uploadedFiles.length;
+
     if (uploadedFiles.length === 0) {
         alert('No valid SVG files found. Please upload files with .svg extension.');
         return;
